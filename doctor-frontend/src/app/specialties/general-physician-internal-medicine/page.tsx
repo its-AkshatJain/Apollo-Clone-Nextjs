@@ -327,7 +327,7 @@ export default function DestinationPage() {
                 
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <p className="text-gray-600 text-sm">
-                    General Physicians are skilled doctors trained to diagnose and treat a wide range of health conditions. They provide comprehensive healthcare and can refer patients to specialists when necessary. Apollo's General Physicians have vast experience in treating various ailments and offer expert medical advice.
+                    General Physicians are skilled doctors trained to diagnose and treat a wide range of health conditions. They provide comprehensive healthcare and can refer patients to specialists when necessary. Apollo General Physicians have vast experience in treating various ailments and offer expert medical advice.
                   </p>
                 </div>
               </div>
