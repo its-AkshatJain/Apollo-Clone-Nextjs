@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Link from "next/link";
 import Head from "next/head";
@@ -32,8 +32,8 @@ export default function DestinationPage() {
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>([]);
 
-  // Fetch doctors
-  const fetchDoctors = async () => {
+  // Fetch doctors - now wrapped with useCallback to prevent unstable references
+  const fetchDoctors = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await axios.get(
@@ -54,32 +54,31 @@ export default function DestinationPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Fetch specialties and locations
-  const fetchFilters = async () => {
-    try {
-      const [specRes, locRes] = await Promise.all([
-        axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/specialties`),
-        axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/locations`),
-      ]);
-      setSpecialties(specRes.data.specialties || []);
-      setLocations(locRes.data.locations || []);
-    } catch (error) {
-      console.error("Error fetching filter options", error);
-    }
-  };
-
-  // On load
-  useEffect(() => {
-    fetchFilters();
-    fetchDoctors();
-  }, []);
-
-  // On filter change or page change
-  useEffect(() => {
-    fetchDoctors();
   }, [specialty, location, page]);
+  
+  // Fetch filter options only once on mount
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        const [specRes, locRes] = await Promise.all([
+          axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/specialties`),
+          axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/locations`),
+        ]);
+        setSpecialties(specRes.data.specialties || []);
+        setLocations(locRes.data.locations || []);
+      } catch (error) {
+        console.error("Error fetching filter options", error);
+      }
+    };
+  
+    fetchFilters();
+  }, []);
+  
+  // Re-fetch doctors when filters or page changes
+  useEffect(() => {
+    fetchDoctors();
+  }, [fetchDoctors]);
+  
 
   // Generate star ratings
   const renderStars = (rating: number) => {
