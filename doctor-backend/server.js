@@ -16,7 +16,10 @@ connectDB();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL,  // allow your Vite frontend
+  credentials: true,                // if you send cookies / auth headers
+}));
 app.use(express.json());
 
 // serve uploads folder
