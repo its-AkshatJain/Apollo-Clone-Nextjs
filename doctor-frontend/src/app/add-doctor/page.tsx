@@ -95,14 +95,13 @@ export default function AddDoctorPage() {
         router.push("/specialties/general-physician-internal-medicine");
       }, 2000);
       
-    } catch (error: any) {
-      setMessage({ 
-        text: error.message || "Failed to add doctor. Please try again.", 
-        type: "error" 
-      });
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) {
+      if (error instanceof Error) {
+        setMessage({ text: error.message, type: "error" });
+      } else {
+        setMessage({ text: "Failed to add doctor. Please try again.", type: "error" });
+      }
+    }    
   };
 
   return (
@@ -198,11 +197,13 @@ export default function AddDoctorPage() {
                 <div className="flex items-center space-x-6">
                   <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200">
                     {previewUrl ? (
-                      <img 
-                        src={previewUrl} 
-                        alt="Doctor preview" 
-                        className="w-full h-full object-cover"
-                      />
+                      <Image 
+                      src={previewUrl} 
+                      alt="Doctor preview" 
+                      width={96} 
+                      height={96} 
+                      className="object-cover rounded-full" 
+                    />                    
                     ) : (
                       <FaImage className="text-gray-400 text-4xl" />
                     )}
@@ -232,7 +233,7 @@ export default function AddDoctorPage() {
 
               <div className="border-t border-gray-200 pt-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="name">
-                  Doctor's Name *
+                Doctor&apos;s Name *
                 </label>
                 <div className="flex">
                   <div className="bg-gray-100 border border-r-0 border-gray-300 rounded-l-md p-3">
