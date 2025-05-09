@@ -1,0 +1,5 @@
+const DoctorPlaceholder = () => (
+  <svg className="w-full h-full text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 12a5 5 0 110-10 5 5 0 010 10zm0-2a3 3 0 100-6 3 3 0 000 6zm7 11a1 1 0 01-1 1H6a1 1 0 01-1-1v-1a7 7 0 0114 0v1z" />
+  </svg>
+);

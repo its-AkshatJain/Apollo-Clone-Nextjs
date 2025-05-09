@@ -19,7 +19,7 @@ const upload = multer({ storage });
 // POST /api/add-doctor (now accepts image)
 router.post(
   "/add-doctor",
-  upload.single("image"),               // ← multer middleware
+  upload.single("image"),
   async (req, res) => {
     try {
       const data = {
@@ -27,8 +27,8 @@ router.post(
         rating: parseFloat(req.body.rating),
       };
       if (req.file) {
-        // save the public URL or file path
-        data.image = `/uploads/${req.file.filename}`;
+        // Note: Save path without leading slash for consistent URL construction
+        data.image = `uploads/${req.file.filename}`;
       }
       const doctor = new Doctor(data);
       await doctor.save();
@@ -42,11 +42,12 @@ router.post(
 
 // GET /api/list-doctor-with-filter?page=1&limit=10&specialty=...&location=...
 router.get("/list-doctor-with-filter", async (req, res) => {
-  const { page = 1, limit = 10, specialty, location } = req.query;
+  const { page = 1, limit = 10, specialty, location, name } = req.query;
 
   const filters = {};
   if (specialty) filters.specialty = specialty;
   if (location) filters.location = location;
+  if (name) filters.name = { $regex: name, $options: 'i' }; // Add name search with case-insensitive regex
 
   try {
     const doctors = await Doctor.find(filters)
@@ -65,7 +66,7 @@ router.get("/list-doctor-with-filter", async (req, res) => {
   }
 });
 
-// NEW: GET /api/specialties
+// GET /api/specialties
 router.get("/specialties", async (req, res) => {
   try {
     const specialties = await Doctor.distinct("specialty");
@@ -75,7 +76,7 @@ router.get("/specialties", async (req, res) => {
   }
 });
 
-// NEW: GET /api/locations
+// GET /api/locations
 router.get("/locations", async (req, res) => {
   try {
     const locations = await Doctor.distinct("location");

@@ -17,3 +17,5 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     </html>
   );
 }
+
+export const dynamicParams = false;

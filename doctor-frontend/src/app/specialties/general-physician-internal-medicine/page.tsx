@@ -31,6 +31,7 @@ export default function DestinationPage() {
   // Dynamic dropdown options
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [locations, setLocations] = useState<string[]>([]);
+  const [searchName, setSearchName] = useState("");
 
   // Fetch doctors - now wrapped with useCallback to prevent unstable references
   const fetchDoctors = useCallback(async () => {
@@ -44,6 +45,7 @@ export default function DestinationPage() {
             location,
             page,
             limit,
+            name: searchName, // Add name parameter for search
           },
         }
       );
@@ -54,7 +56,7 @@ export default function DestinationPage() {
     } finally {
       setLoading(false);
     }
-  }, [specialty, location, page]);
+  }, [specialty, location, page, searchName]);
   
   // Fetch filter options only once on mount
   useEffect(() => {
@@ -79,6 +81,12 @@ export default function DestinationPage() {
     fetchDoctors();
   }, [fetchDoctors]);
   
+  // Handle search by name
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1); // Reset to first page when searching
+    fetchDoctors();
+  };
 
   // Generate star ratings
   const renderStars = (rating: number) => {
@@ -108,6 +116,22 @@ export default function DestinationPage() {
     setShowFilters(!showFilters);
   };
 
+  // Function to get full image URL - UPDATED
+  // Update the getImageUrl function
+  const getImageUrl = (imageUrl?: string): string => {
+    if (!imageUrl) return '/placeholder-doctor.png';
+    
+    // Handle cases where imageUrl might have leading/trailing slashes
+    const cleanImageUrl = imageUrl.replace(/^\/+|\/+$/g, '');
+    
+    // For production, you might need to adjust this
+    if (process.env.NODE_ENV === 'production') {
+      return `https://your-api-domain.com/${cleanImageUrl}`;
+    }
+    
+    return `http://localhost:5000/${cleanImageUrl}`;
+  };
+
   return (
     <>
       <Head>
@@ -124,22 +148,25 @@ export default function DestinationPage() {
         <div className="bg-white text-gray-800 py-3 shadow-md sticky top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
             <div className="flex items-center">
+              <Link href="/">
               <Image 
                 src="/apollo247.svg" 
                 alt="Apollo 247" 
-                width={120} 
-                height={30} 
-                className="mr-6"
+                width={100} 
+                height={28}
+                className="mr-6 h-auto w-auto" // Add this
+                priority // For above-the-fold images
               />
+              </Link>
               <div className="hidden md:flex space-x-8">
-                <span className="cursor-pointer hover:text-blue-600 font-medium">Doctors</span>
+                <span className="cursor-pointer hover:text-blue-600 font-medium text-blue-700">Doctors</span>
                 <span className="cursor-pointer hover:text-blue-600">Pharmacy</span>
                 <span className="cursor-pointer hover:text-blue-600">Lab Tests</span>
                 <span className="cursor-pointer hover:text-blue-600">Health Records</span>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="hidden md:block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+              <button className="hidden md:block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
                 Sign In / Sign Up
               </button>
               <button className="md:hidden text-gray-600">
@@ -161,7 +188,7 @@ export default function DestinationPage() {
           <div className="mb-6">
             <Link 
               href="/add-doctor" 
-              className="bg-orange-400 text-white flex items-center justify-center px-4 py-3 rounded-md hover:bg-orange-500 transition shadow-md"
+              className="bg-orange-500 text-white flex items-center justify-center px-4 py-3 rounded-md hover:bg-orange-600 transition shadow-md max-w-md mx-auto md:mx-0"
             >
               <FaPlus className="mr-2" /> Add a New Doctor
             </Link>
@@ -184,20 +211,40 @@ export default function DestinationPage() {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden sticky top-20">
                 <div className="p-4 bg-blue-50 border-b border-gray-200 flex items-center justify-between">
                   <h2 className="font-medium text-gray-800">Filters</h2>
-                  <button className="text-blue-600 text-sm hover:underline">Reset All</button>
+                  <button 
+                    className="text-blue-600 text-sm hover:underline"
+                    onClick={() => {
+                      setSpecialty("");
+                      setLocation("");
+                      setSearchName("");
+                      setPage(1);
+                    }}
+                  >
+                    Reset All
+                  </button>
                 </div>
                 
                 {/* Search by name */}
                 <div className="p-4 border-b border-gray-200">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Search by Name</label>
-                  <div className="relative">
-                    <input 
-                      type="text"
-                      placeholder="Doctor's name"
-                      className="w-full border border-gray-300 rounded-md pl-10 pr-4 py-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  </div>
+                  <form onSubmit={handleSearch}>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Search by Name</label>
+                    <div className="relative">
+                      <input 
+                        type="text"
+                        placeholder="Doctor's name"
+                        value={searchName}
+                        onChange={(e) => setSearchName(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md pl-10 pr-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <button 
+                        type="submit" 
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-800"
+                      >
+                        Go
+                      </button>
+                    </div>
+                  </form>
                 </div>
                 
                 {/* Specialty filter */}
@@ -327,7 +374,7 @@ export default function DestinationPage() {
                 
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <p className="text-gray-600 text-sm">
-                    General Physicians are skilled doctors trained to diagnose and treat a wide range of health conditions. They provide comprehensive healthcare and can refer patients to specialists when necessary. Apollo General Physicians have vast experience in treating various ailments and offer expert medical advice.
+                    General Physicians are skilled doctors trained to diagnose and treat a wide range of health conditions. They provide comprehensive healthcare and can refer patients to specialists when necessary. Apollo's General Physicians have vast experience in treating various ailments and offer expert medical advice.
                   </p>
                 </div>
               </div>
@@ -361,19 +408,22 @@ export default function DestinationPage() {
                           <div className="p-4 md:p-6 flex flex-col md:flex-row">
                             {/* Doctor avatar */}
                             <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6 flex justify-center">
-                              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                                {doc.image ? (
-                                  <Image 
-                                    src={doc.image} 
-                                    alt={doc.name} 
-                                    width={96} 
-                                    height={96}
-                                    className="object-cover" 
-                                  />
-                                ) : (
-                                  <FaUserMd className="text-gray-400 text-4xl" />
-                                )}
-                              </div>
+                            <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200">
+  {doc.image ? (
+    <img
+      src={getImageUrl(doc.image)}
+      alt={doc.name}
+      className="w-full h-full object-cover"
+      onError={(e) => {
+        const target = e.target as HTMLImageElement;
+        target.src = '/placeholder-doctor.png';
+        target.onerror = null; // Prevent infinite loop if placeholder also fails
+      }}
+    />
+  ) : (
+    <FaUserMd className="text-gray-400 text-4xl" />
+  )}
+</div>
                             </div>
                             
                             <div className="flex-grow">
