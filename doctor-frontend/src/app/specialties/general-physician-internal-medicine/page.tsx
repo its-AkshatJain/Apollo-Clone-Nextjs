@@ -119,19 +119,14 @@ export default function DestinationPage() {
   // Function to get full image URL - UPDATED
   // Update the getImageUrl function
   const getImageUrl = (imageUrl?: string): string => {
-    if (!imageUrl) return '/placeholder-doctor.png';
-    
-    // Handle cases where imageUrl might have leading/trailing slashes
-    const cleanImageUrl = imageUrl.replace(/^\/+|\/+$/g, '');
-    
-    // For production
-    if (process.env.NODE_ENV === 'production') {
-      return `https://your-render-app-name.onrender.com/${cleanImageUrl}`;
-    }
-    
-    // For development
-    return `http://localhost:5000/${cleanImageUrl}`;
-  };
+  if (!imageUrl) return '/Doctor-placeholder.svg';
+
+  const cleanImageUrl = imageUrl.replace(/^\/+|\/+$/g, '');
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '').replace(/\/api$/, '');
+
+  return `${baseUrl}/${cleanImageUrl}`;
+};
+
 
   return (
     <>
@@ -411,19 +406,19 @@ export default function DestinationPage() {
                             <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6 flex justify-center">
                             <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-200">
   {doc.image ? (
-    <img
-      src={getImageUrl(doc.image)}
-      alt={doc.name}
-      className="w-full h-full object-cover"
-      onError={(e) => {
-        const target = e.target as HTMLImageElement;
-        target.src = '/Doctor-placeholder.svg.';
-        target.onerror = null; // Prevent infinite loop if placeholder also fails
-      }}
-    />
-  ) : (
-    <FaUserMd className="text-gray-400 text-4xl" />
-  )}
+  <img
+    src={getImageUrl(doc.image)}
+    alt={doc.name}
+    className="w-full h-full object-cover"
+    onError={(e) => {
+      const target = e.target as HTMLImageElement;
+      target.src = '/Doctor-placeholder.svg'; // Fixed typo
+      target.onerror = null;
+    }}
+  />
+) : (
+  <FaUserMd className="text-gray-400 text-4xl" />
+)}
 </div>
                             </div>
                             
