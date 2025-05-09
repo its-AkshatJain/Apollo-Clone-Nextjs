@@ -124,11 +124,12 @@ export default function DestinationPage() {
     // Handle cases where imageUrl might have leading/trailing slashes
     const cleanImageUrl = imageUrl.replace(/^\/+|\/+$/g, '');
     
-    // For production, you might need to adjust this
+    // For production
     if (process.env.NODE_ENV === 'production') {
-      return `https://your-api-domain.com/${cleanImageUrl}`;
+      return `https://your-render-app-name.onrender.com/${cleanImageUrl}`;
     }
     
+    // For development
     return `http://localhost:5000/${cleanImageUrl}`;
   };
 
@@ -416,7 +417,7 @@ export default function DestinationPage() {
       className="w-full h-full object-cover"
       onError={(e) => {
         const target = e.target as HTMLImageElement;
-        target.src = '/placeholder-doctor.png';
+        target.src = '/Doctor-placeholder.svg.';
         target.onerror = null; // Prevent infinite loop if placeholder also fails
       }}
     />

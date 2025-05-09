@@ -27,19 +27,30 @@ app.use(cors());
 app.use(express.json());
 
 // 2. Enhanced static file serving with error handling
-app.use("/uploads", (req, res, next) => {
-  express.static(path.join(__dirname, "uploads"), {
-    setHeaders: (res, path) => {
-      // Set proper cache headers
-      res.set('Cache-Control', 'public, max-age=31536000');
-    }
-  })(req, res, next);
-}, (err, req, res, next) => {
-  if (err) {
-    console.error('Static file error:', err);
-    res.status(404).json({ error: 'Image not found' });
-  }
-});
+// app.use("/uploads", (req, res, next) => {
+//   express.static(path.join(__dirname, "uploads"), {
+//     setHeaders: (res, path) => {
+//       // Set proper cache headers
+//       res.set('Cache-Control', 'public, max-age=31536000');
+//     }
+//   })(req, res, next);
+// }, (err, req, res, next) => {
+//   if (err) {
+//     console.error('Static file error:', err);
+//     res.status(404).json({ error: 'Image not found' });
+//   }
+// });
+
+// Replace your current static file serving with this:
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res) => {
+    res.set('Cache-Control', 'public, max-age=31536000');
+  },
+  fallthrough: false // Important for production
+}));
+
+// Add this for your placeholder image
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 3. Add request logging middleware
 app.use((req, res, next) => {
